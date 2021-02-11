@@ -9,9 +9,9 @@ def gaussian_bounce(mu, Sig):
         vv = 0.5*v.T.dot(inv_Sig).dot(v)
         xv = 0.5*v.T.dot(inv_Sig).dot(x-mu)
         if xv <0:
-            return (-xv + np.sqrt(-vv*np.log(epsilon)))/ vv
+            return (-xv + np.sqrt(-vv*np.log(epsilon)))/ vv, 'B'
         else:
-            return (-xv + np.sqrt(xv**2 - vv*np.log(epsilon)))/vv
+            return (-xv + np.sqrt(xv**2 - vv*np.log(epsilon)))/vv, 'B'
     return func
 
 
@@ -42,9 +42,9 @@ def gaussian_bounce1d(mu, sig):
         vv = 0.5*v*v*inv_sig
         xv = 0.5*v*inv_sig*(x-mu)
         if xv < 0:
-            return (-xv + np.sqrt(-vv*np.log(epsilon))) / vv
+            return (-xv + np.sqrt(-vv*np.log(epsilon))) / vv, 'B'
         else:
-            return (-xv + np.sqrt(xv**2 - vv*np.log(epsilon))) / vv
+            return (-xv + np.sqrt(xv**2 - vv*np.log(epsilon))) / vv, 'B'
     return func
 
 
@@ -74,7 +74,7 @@ def chain_bounce(x1, x2, v1, v2, mu1, mu2, inv_sig, transform):
         out = -b + np.sqrt(-a * np.log(epsilon))
     else:
         out = -b + np.sqrt(b ** 2 - a * np.log(epsilon))
-    return out / a
+    return out / a, 'B'
 
 
 def chain_bounce_fn(mu1, mu2, Sig1, Sig2, Sig12):

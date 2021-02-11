@@ -38,8 +38,8 @@ class LocalBPS(LinearPDMCMC):
             factor_ind = self.factor_graph.factor_indices[f_prime]
             x = self.x[factor_ind].copy()
             v = self.v[factor_ind].copy()
-            bounce_time = self.bounce_fns[f_prime](x, v)
-            self.pq.add_item(f_prime, t + bounce_time)
+            bounce_time, token = self.bounce_fns[f_prime](x, v)
+            self.pq.add_item((f_prime, token), t + bounce_time)
 
     def bounce_factor(self, f):
         factor_ind = self.factor_graph.factor_indices[f]
@@ -57,8 +57,8 @@ class LocalBPS(LinearPDMCMC):
             factor_ind = self.factor_graph.factor_indices[f]
             x = self.x[factor_ind].copy()
             v = self.v[factor_ind].copy()
-            bounce_time = self.bounce_fns[f](x, v)
-            self.pq.add_item(f, t + bounce_time)
+            bounce_time, token = self.bounce_fns[f](x, v)
+            self.pq.add_item((f, token), t + bounce_time)
 
     def refresh_event(self):
         self.v = norm.rvs(size=self.factor_graph.dim_x)
@@ -66,10 +66,11 @@ class LocalBPS(LinearPDMCMC):
         self.refresh_time = self.refresh_time + self.new_refresh_time()
 
     def next_event(self):
-        f, bounce_time = self.pq.pop_task()
+        (f, token), bounce_time = self.pq.pop_task()
         if bounce_time < self.refresh_time:
             self.propagate_neighbours(f, bounce_time)
-            self.bounce_factor(f)
+            if token == 'B':
+                self.bounce_factor(f)
             self.update_queue(f, bounce_time)
         else:
             self.propagate_x(self.refresh_time- self.t)

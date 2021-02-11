@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib import rc
 
-# plot settings
-rc('text', usetex=True)
 
 
 def line_plot(x, y, col = 'r',

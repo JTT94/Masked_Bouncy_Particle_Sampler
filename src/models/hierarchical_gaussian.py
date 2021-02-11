@@ -1,7 +1,7 @@
 
 from src.data_structures.factor_graph import FactorGraph
 import numpy as np
-from src.sampling_algorithms.event_time_samplers.bounce_time_samplers import gaussian_bounce1d, chain_bounce_fn
+from src.sampling_algorithms.event_time_samplers import gaussian_bounce1d, chain_bounce_fn
 from src.utils.normal_helpers import gaussian_grad_potential_fn1d, gaussian_chain_grad_potential_fn
 from ..utils import interp
 

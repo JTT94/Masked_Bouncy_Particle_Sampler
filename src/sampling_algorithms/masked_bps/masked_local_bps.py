@@ -294,7 +294,7 @@ class MaskedLocalBPS(object):
         x = interp(x1, t1, v1*mask, num_intervals=num_draws)
         return x
 
-    def masked_get_x(self, i, results, factor_indices, groups, num_draws):
+    def g(self, i, results, factor_indices, groups, num_draws):
         group_loc = self.get_which_group(i, groups, factor_indices)
         x = np.concatenate([self.masked_get_xs(results, s, i, group_loc[s], num_draws) for s in range(len(results))])
         return x

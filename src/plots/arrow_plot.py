@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 
-def arrow_plot(x,y, plot_code='ro'):
+def arrow_plot(x,y, plot_code='ro', head_width=0.1, head_length=0.1):
     for i in range(len(x) - 1):
         plt.arrow(x[i], y[i], (x[i + 1] - x[i]), (y[i + 1] - y[i]),
-                  head_width=0.1, head_length=0.1)
+                  head_width=head_width, head_length=head_length)
     plt.plot(x, y, plot_code)
 
 
