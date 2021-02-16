@@ -97,8 +97,9 @@ class SubMaskedLocalBPS(LinearPDMCMC):
             x = self.x[factor_ind].copy()
             v = effective_v[factor_ind].copy()
             if np.sum(v) != 0.:
-                bounce_time = self.bounce_fns[f_prime](x, v)
-                self.pq.add_item(f_prime, t + bounce_time)
+                #bounce_time = self.bounce_fns[f_prime](x, v)
+                bounce_time, token, thin_factor = self.bounce_fns[f_prime](x, v)
+                self.pq.add_item((f_prime, token, thin_factor), t + bounce_time)
 
     def bounce_factor(self, f):
         factor_ind = self.factor_graph.factor_indices[f]
@@ -124,8 +125,10 @@ class SubMaskedLocalBPS(LinearPDMCMC):
             mask = self.mask[factor_ind].copy()
             effective_v = v * mask
             if np.sum(effective_v) != 0.:
-                bounce_time = self.bounce_fns[f](x, effective_v)
-                self.pq.add_item(f, t + bounce_time)
+                #bounce_time = self.bounce_fns[f](x, effective_v)
+                #self.pq.add_item(f, t + bounce_time)
+                bounce_time, token, thin_factor = self.bounce_fns[f](x, effective_v)
+                self.pq.add_item((f, token, thin_factor), t + bounce_time)
 
     def get_state(self):
         return self.x.copy(), self.v.copy(), self.t.copy(), self.mask.copy()
@@ -139,7 +142,7 @@ class SubMaskedLocalBPS(LinearPDMCMC):
 
         keep_going = True
         while keep_going:  # latest_t < max_t:
-            f, bounce_time = self.pq.pop_task()
+            (f, token, thin_factor), bounce_time = self.pq.pop_task()
             if bounce_time < max_t:
                 self.next_event(f, bounce_time)
                 (x, v, t, mask) = self.get_state()

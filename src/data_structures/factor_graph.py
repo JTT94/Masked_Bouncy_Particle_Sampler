@@ -20,8 +20,8 @@ class FactorGraph(object):
         return np.sum(self.grad_factor_potential_fns[f](x[ind])
                       for f, ind in enumerate(self.factor_indices))
 
-    def grad_factor_potential(self, f, x):
-        return self.grad_factor_potential_fns[f](x)
+    def grad_factor_potential(self, f, x, thin_factor=None):
+        return self.grad_factor_potential_fns[f](x, thin_factor)
 
     def _neighbour_map(self):
         neighbour_map = {}

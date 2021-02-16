@@ -1,6 +1,7 @@
 import numpy as np
 import time
 from abc import ABC, abstractmethod
+import tqdm
 
 class LinearPDMCMC(ABC):
     def __init__(self, init_x, init_v):
@@ -34,7 +35,7 @@ class LinearPDMCMC(ABC):
         results.append(self.get_state())
         for _ in range(burn_in_steps):
             self.next_event()
-        for _ in range(num_events):
+        for _ in tqdm.tqdm(range(num_events)):
             self.next_event()
             results.append(self.get_state())
         return np.array(results)

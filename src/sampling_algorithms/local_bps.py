@@ -31,21 +31,28 @@ class LocalBPS(LinearPDMCMC):
         for f_prime in f_to_update:
             self.propagate_factor_x(f_prime, t)
 
+    def update_queue_factor(self, f, t):
+        factor_ind = self.factor_graph.factor_indices[f]
+        x = self.x[factor_ind].copy()
+        v = self.v[factor_ind].copy()
+        bounce_time, token, thin_factor = self.bounce_fns[f](x, v)
+        if (bounce_time < 0.) or (np.isnan(bounce_time)):
+            print(self.get_state())
+            raise Exception('queue', 'f', f)
+ 
+        self.pq.add_item((f, token, thin_factor), t + bounce_time)
+
     def update_queue(self, f, t):
         f_to_update = self.factor_graph.neighbour_map[f]
 
         for f_prime in f_to_update:
-            factor_ind = self.factor_graph.factor_indices[f_prime]
-            x = self.x[factor_ind].copy()
-            v = self.v[factor_ind].copy()
-            bounce_time, token = self.bounce_fns[f_prime](x, v)
-            self.pq.add_item((f_prime, token), t + bounce_time)
+            self.update_queue_factor(f_prime, t)
 
-    def bounce_factor(self, f):
+    def bounce_factor(self, f, thin_factor):
         factor_ind = self.factor_graph.factor_indices[f]
         x = self.x[factor_ind].copy()
         v = self.v[factor_ind].copy()
-        grad_fx = self.factor_graph.grad_factor_potential(f, x)
+        grad_fx = self.factor_graph.grad_factor_potential(f, x, thin_factor)
         new_v = v - 2. * grad_fx.dot(v) * grad_fx / grad_fx.dot(grad_fx)
         self.v[factor_ind] = new_v
 
@@ -57,8 +64,12 @@ class LocalBPS(LinearPDMCMC):
             factor_ind = self.factor_graph.factor_indices[f]
             x = self.x[factor_ind].copy()
             v = self.v[factor_ind].copy()
-            bounce_time, token = self.bounce_fns[f](x, v)
-            self.pq.add_item((f, token), t + bounce_time)
+            bounce_time, token, thin_factor = self.bounce_fns[f](x, v)
+            if (bounce_time < 0.) or (np.isnan(bounce_time)):
+                print(self.get_state())
+                raise Exception('refresh','f', f)
+  
+            self.pq.add_item((f, token, thin_factor), t + bounce_time)
 
     def refresh_event(self):
         self.v = norm.rvs(size=self.factor_graph.dim_x)
@@ -66,12 +77,16 @@ class LocalBPS(LinearPDMCMC):
         self.refresh_time = self.refresh_time + self.new_refresh_time()
 
     def next_event(self):
-        (f, token), bounce_time = self.pq.pop_task()
+        (f, token, thin_factor), bounce_time = self.pq.pop_task()
         if bounce_time < self.refresh_time:
-            self.propagate_neighbours(f, bounce_time)
+            
             if token == 'B':
-                self.bounce_factor(f)
-            self.update_queue(f, bounce_time)
+                self.propagate_neighbours(f, bounce_time)
+                self.bounce_factor(f, thin_factor)
+                self.update_queue(f, bounce_time)
+            else:
+                self.propagate_factor_x(f, bounce_time)
+                self.update_queue_factor(f, bounce_time)
         else:
             self.propagate_x(self.refresh_time- self.t)
             self.refresh_event()
