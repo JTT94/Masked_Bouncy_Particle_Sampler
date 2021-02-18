@@ -259,7 +259,7 @@ class MaskedLocalBPS(object):
         # distributed operations
         start_time = time.time()
         new_x = np.array(ray.get([
-            self.sub_samplers[i].run_to_T.remote(handles, 
+            self.sub_samplers[i%self.max_number_sub_samplers].run_to_T.remote(handles, 
                                                  factor_groups[i], 
                                                  self.refresh_time,
                                                 os.path.join(output_dir, 

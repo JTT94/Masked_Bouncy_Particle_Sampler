@@ -49,6 +49,7 @@ def grad_logistic(covariates, obs):
         cov = covs[thin_factor]
         y = ys[thin_factor]
         
+       
         e = np.exp(cov.dot(x))
         out = cov*(e/(1+e)-y)
         return out
